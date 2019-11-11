@@ -1,0 +1,92 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>SpringBoot - テスト用画面</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta charset="UTF-8" />
+  <style type="text/css">
+    form {
+        border-style: solid;
+        border-color: black;
+        border-width: 1px;
+        margin: 5px;
+        padding: 10px;
+    } 
+  </style>
+</head>
+<body>
+
+    <h1 th:text="'API test&DB connection test'">h1-text</h1>
+
+<form action="/api/resource" method="post" id="apiForm">
+<p id="result">api test</p>
+<input type="text" name="msg" value="" placeholder="メッセージ">
+<br>
+<input type="text" name="memo" value="" placeholder="メモ">
+<br>
+<input type="radio" name="methodType" value="GET" id="methodGet" checked><label for="methodGet">GET</label>
+<input type="radio" name="methodType" value="POST" id="methodPost"><label for="methodPost">POST</label>
+<input type="radio" name="methodType" value="PUT" id="methodPut"><label for="methodPut">PUT</label>
+<input type="radio" name="methodType" value="DELETE" id="methodDelete"><label for="methodDelete">DELETE</label>
+<input id="submitEvent" type="button" name="send" value="送信">
+</form>
+
+<script>
+
+	var submitInfo = document.getElementById('submitEvent');
+	submitInfo.addEventListener('click', (event) => {
+		var element = document.getElementById('apiForm');
+		var req = new XMLHttpRequest();
+		var methodInfo = element.methodType.value;
+		var sendMethod;
+		var reqUri = '/api/resource';
+		var sendValue = {
+				'method' : methodInfo,
+				'msg' : element.msg.value,
+				'memo' : element.memo.value
+		}
+		var sendInfo = null;
+		var isPostReq = true;
+		switch(methodInfo) {
+			case 'POST':
+				sendMethod = 'POST';
+				sendInfo = JSON.stringify(sendValue);
+				break;
+			case 'DELETE' :
+				sendMethod = 'DELETE';
+				sendInfo = JSON.stringify(sendValue);
+				break;
+			case 'PUT' :
+				sendMethod = 'PUT';
+				sendInfo = JSON.stringify(sendValue);
+				break;
+			case 'GET' :
+			default :
+				sendMethod = 'GET';
+				reqUri = '/api/resource?method=' + methodInfo + '&msg=' + element.msg.value + '&memo=' + element.memo.value;
+				isPostReq = false;
+				break;
+		}
+		req.open(sendMethod, reqUri, true);
+		if(isPostReq) req.setRequestHeader('content-type', 'application/json;charset=UTF-8');
+		req.send(sendInfo);
+		req.onreadystatechange = function() {
+		  var result = document.getElementById('result');
+		  if (req.readyState == 4) { // 通信の完了時
+		  	if (req.status == 200) { // 通信の成功時
+		    	result.innerHTML = req.responseText;
+		    } else {
+		    	result.innerHTML = req.status;
+		    }
+		  } else {
+		  	result.innerHTML = "通信中...";
+		  }
+		}
+		return false;
+	});
+	
+
+</script>
+
+</body>
+</html>
